@@ -1,3 +1,4 @@
 *.js
 *.d.ts
+aws-auth-cm.yaml
 node_modules
