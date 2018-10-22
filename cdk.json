@@ -1,0 +1,10 @@
+{
+  "app": "node bin/eks-example.js",
+  "context": {
+    "availability-zones:667237269012:us-west-2": [
+      "us-west-2a",
+      "us-west-2b",
+      "us-west-2c"
+    ]
+  }
+}
