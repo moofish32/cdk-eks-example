@@ -47,6 +47,7 @@ export class EksNodeGroupStack extends cdk.Stack {
       instanceType: new ec2.InstanceTypePair(ec2.InstanceClass.T3, ec2.InstanceSize.Medium),
       machineImage: new ec2.GenericLinuxImage(amiMap),
       vpc,
+      allowAllOutbound: true,
       minSize: 1,
       maxSize: 5,
       desiredCapacity: 3,
