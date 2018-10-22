@@ -88,7 +88,6 @@ export class EksNodeGroupStack extends cdk.Stack {
     this.workerNodeASG.connections.allowFrom(controlPlaneSG, CP_WORKER_PORTS);
     this.workerNodeASG.connections.allowFrom(controlPlaneSG, API_PORTS);
     this.workerNodeASG.connections.allowInternally(new ec2.AllConnections());
-
     const cpConnection = controlPlaneSG.connections;
     cpConnection.allowTo(this.workerNodeASG, CP_WORKER_PORTS);
     cpConnection.allowTo(this.workerNodeASG, API_PORTS);
