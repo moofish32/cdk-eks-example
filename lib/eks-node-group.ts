@@ -86,9 +86,12 @@ export class EksNodeGroupStack extends cdk.Stack {
       `  --region ${new cdk.AwsRegion()}`
     );
 
+    this.workerNodeASG.connections.allowToAnyIPv4(new ec2.AllConnections());
     this.workerNodeASG.connections.allowFrom(controlPlaneSG, CP_WORKER_PORTS);
     this.workerNodeASG.connections.allowFrom(controlPlaneSG, API_PORTS);
     this.workerNodeASG.connections.allowInternally(new ec2.AllConnections());
+    // this line has no effect in the stack
+    this.workerNodeASG.connections.allowTo(new ec2.AnyIPv4(), new ec2.AllConnections());
     const cpConnection = controlPlaneSG.connections;
     cpConnection.allowTo(this.workerNodeASG, CP_WORKER_PORTS);
     cpConnection.allowTo(this.workerNodeASG, API_PORTS);
