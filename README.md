@@ -139,7 +139,7 @@ this repo called [aws-auth-cm.yaml](aws-auth-cm.yaml) with the Role ARN from the
 EksWorkers state output. Specifically replace this line with your value.
 
 ```
-    - rolearn: '<you much put in your role arn here>'
+    - rolearn: '<your role arn here>'
 ```
 
 This file gives the Kubernetes permission to join the cluster specifically to
