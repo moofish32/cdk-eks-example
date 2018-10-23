@@ -1,6 +1,14 @@
 {
   "app": "node bin/eks-example.js",
   "context": {
+    "cluster-name": "EksExample",
+    "key-name": null,
+    "node-group-max-size": 5,
+    "node-group-min-size": 1,
+    "node-group-desired-size": 3,
+    "node-group-instance-type": "t3.medium",
+    "bastion": false,
+    "ssh-allowed-cidr": [],
     "availability-zones:667237269012:us-west-2": [
       "us-west-2a",
       "us-west-2b",
