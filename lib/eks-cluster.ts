@@ -68,12 +68,12 @@ export class EksClusterStack extends cdk.Stack {
         {
           subnetType: ec2.SubnetType.Public,
           name: 'EksPublic',
-          cidrMask: 24,
+          cidrMask: 25,
         },
         {
           subnetType: ec2.SubnetType.Private,
           name: 'EksPrivate',
-          cidrMask: 21,
+          cidrMask: 22,
           tags: privateSubnetTags,
         },
       ],
