@@ -47,7 +47,6 @@ export class EksClusterStack extends cdk.Stack {
       },
       roleArn: eksRole.roleArn,
     });
-
   }
 
   private createVpc(props: ClusterProps): ec2.VpcNetworkRef {
@@ -64,6 +63,7 @@ export class EksClusterStack extends cdk.Stack {
 
     return {
       cidr: '10.0.0.0/16',
+      natGateways: 1,
       subnetConfiguration: [
         {
           subnetType: ec2.SubnetType.Public,

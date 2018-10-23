@@ -7,6 +7,13 @@ export interface NodeGroupProps extends cdk.StackProps {
   controlPlaneSG: ec2.SecurityGroupRefProps;
   vpc: ec2.VpcNetworkRefProps;
   clusterName: string;
+  bastion: boolean;
+  sshAllowedCidr: string[];
+  keyName?: string;
+  nodeGroupMaxSize: number;
+  nodeGroupMinSize: number;
+  nodeGroupDesiredSize: number;
+  nodeGroupInstanceType: string;
 }
 
 const CP_WORKER_PORTS = new ec2.TcpPortRange(1025, 65535);
@@ -20,6 +27,7 @@ const WORKER_NODE_POLICIES: string[] = [
 export class EksNodeGroupStack extends cdk.Stack {
 
   public readonly workerNodeASG: asg.AutoScalingGroup;
+  private bastionASG: asg.AutoScalingGroup;
 
   constructor(parent: cdk.App, name: string, props: NodeGroupProps) {
     super(parent, name, props);
@@ -27,35 +35,26 @@ export class EksNodeGroupStack extends cdk.Stack {
     const vpc = ec2.VpcNetworkRef.import(this, 'ClusterVpc', props.vpc);
     const controlPlaneSG = ec2.SecurityGroupRef.import(this, 'ControlPlaneSG', props.controlPlaneSG)
 
+    // have to periodically update this constant
     const amiMap: {[region: string]: string;} = {
       'us-west-2': 'ami-0a54c984b9f908c81',
       'us-east-1': 'ami-0440e4f6b9713faf6',
       'eu-west-1': 'ami-0c7a4976cb6fafd3a',
     };
-    new asg.AutoScalingGroup(this, 'Bastion', {
-      instanceType: new ec2.InstanceTypePair(ec2.InstanceClass.T3, ec2.InstanceSize.Micro),
-      machineImage: new ec2.GenericLinuxImage(amiMap),
-      vpc,
-      minSize: 1,
-      maxSize: 1,
-      desiredCapacity: 1,
-      keyName: 'mcowgill-id-rsa',
-      vpcPlacement: {subnetsToUse: ec2.SubnetType.Public},
-    });
-
     this.workerNodeASG = new asg.AutoScalingGroup(this, 'Workers', {
-      instanceType: new ec2.InstanceTypePair(ec2.InstanceClass.T3, ec2.InstanceSize.Medium),
+      instanceType: new ec2.InstanceType(props.nodeGroupInstanceType),
       machineImage: new ec2.GenericLinuxImage(amiMap),
       vpc,
-      minSize: 1,
-      maxSize: 5,
-      desiredCapacity: 3,
-      keyName: 'mcowgill-id-rsa',
+      allowAllOutbound: true,
+      minSize: props.nodeGroupMinSize,
+      maxSize: props.nodeGroupMaxSize,
+      desiredCapacity: props.nodeGroupDesiredSize,
+      keyName: props.keyName,
       vpcPlacement: {subnetsToUse: ec2.SubnetType.Private},
       updateType: asg.UpdateType.RollingUpdate,
       rollingUpdateConfiguration: {
-        maxBatchSize: 3,
-        minInstancesInService: 0,
+        maxBatchSize: 1,
+        minInstancesInService: 1,
         pauseTimeSec: 300,
         waitOnResourceSignals: true,
       },
@@ -75,7 +74,9 @@ export class EksNodeGroupStack extends cdk.Stack {
       addToPolicy( new iam.PolicyStatement().
                   addAction('ec2:DescribeTags').addAllResources());
 
+    // this issue is being tracked: https://github.com/awslabs/aws-cdk/issues/623
     const asgResource = this.workerNodeASG.children.find(c => (c as cdk.Resource).resourceType === 'AWS::AutoScaling::AutoScalingGroup') as asg.cloudformation.AutoScalingGroupResource;
+
     this.workerNodeASG.addUserData(
       'set -o xtrace',
       `/etc/eks/bootstrap.sh ${props.clusterName}`,
@@ -88,10 +89,39 @@ export class EksNodeGroupStack extends cdk.Stack {
     this.workerNodeASG.connections.allowFrom(controlPlaneSG, CP_WORKER_PORTS);
     this.workerNodeASG.connections.allowFrom(controlPlaneSG, API_PORTS);
     this.workerNodeASG.connections.allowInternally(new ec2.AllConnections());
-
     const cpConnection = controlPlaneSG.connections;
     cpConnection.allowTo(this.workerNodeASG, CP_WORKER_PORTS);
     cpConnection.allowTo(this.workerNodeASG, API_PORTS);
     cpConnection.allowFrom(this.workerNodeASG, CP_WORKER_PORTS);
+
+    //this issue is being tracked: https://github.com/awslabs/aws-cdk/issues/987
+    const extraSg = new ec2.SecurityGroup(this, 'AllowWorkerOutboundSG', {
+      vpc,
+    });
+    extraSg.tags.setTag(`kubernetes.io/cluster/${props.clusterName}`, 'owned');
+    this.workerNodeASG.addSecurityGroup(extraSg);
+    new cdk.Output(this, 'WorkerRoleArn', {
+      value: this.workerNodeASG.role.roleArn,
+    });
+
+    // add variable constructs at the end because if they are in the middle they
+    // will force a destruction of any resources added after them
+    // see: https://awslabs.github.io/aws-cdk/logical-ids.html
+    if (props.bastion) {
+      this.bastionASG = new asg.AutoScalingGroup(this, 'Bastion', {
+        instanceType: new ec2.InstanceTypePair(ec2.InstanceClass.T3, ec2.InstanceSize.Micro),
+        machineImage: new ec2.GenericLinuxImage(amiMap),
+        vpc,
+        minSize: 1,
+        maxSize: 1,
+        desiredCapacity: 1,
+        keyName: props.keyName,
+        vpcPlacement: {subnetsToUse: ec2.SubnetType.Public},
+      });
+      for (const cidr of props.sshAllowedCidr) {
+        this.bastionASG.connections.allowFrom(new ec2.CidrIPv4(cidr), new ec2.TcpPort(22));
+      }
+      this.workerNodeASG.connections.allowFrom(this.bastionASG, new ec2.TcpPort(22));
+    }
   }
 }
