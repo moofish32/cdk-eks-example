@@ -88,18 +88,12 @@ export class EksNodeGroupStack extends cdk.Stack {
 
     this.workerNodeASG.connections.allowFrom(controlPlaneSG, CP_WORKER_PORTS);
     this.workerNodeASG.connections.allowFrom(controlPlaneSG, API_PORTS);
-    this.workerNodeASG.connections.allowInternally(new ec2.AllConnections());
+    this.workerNodeASG.connections.allowInternally(new ec2.AllTraffic());
     const cpConnection = controlPlaneSG.connections;
     cpConnection.allowTo(this.workerNodeASG, CP_WORKER_PORTS);
     cpConnection.allowTo(this.workerNodeASG, API_PORTS);
     cpConnection.allowFrom(this.workerNodeASG, CP_WORKER_PORTS);
 
-    //this issue is being tracked: https://github.com/awslabs/aws-cdk/issues/987
-    const extraSg = new ec2.SecurityGroup(this, 'AllowWorkerOutboundSG', {
-      vpc,
-    });
-    extraSg.tags.setTag(`kubernetes.io/cluster/${props.clusterName}`, 'owned');
-    this.workerNodeASG.addSecurityGroup(extraSg);
     new cdk.Output(this, 'WorkerRoleArn', {
       value: this.workerNodeASG.role.roleArn,
     });

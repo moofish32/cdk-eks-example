@@ -192,6 +192,5 @@ During the development of this example I noted a couple of issues with the CDK.
 The issues are in comments but for simple tracking you can check out these links
 for issues I worked around in making this example work.
  * https://github.com/awslabs/aws-cdk/issues/623
- * https://github.com/awslabs/aws-cdk/issues/987
 
 

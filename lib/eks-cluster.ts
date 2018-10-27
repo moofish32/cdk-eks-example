@@ -40,7 +40,7 @@ export class EksClusterStack extends cdk.Stack {
     const publicSubnetIds = vpc.publicSubnets.map( s => s.subnetId);
     const privateSubnetIds = vpc.privateSubnets.map( s => s.subnetId);
     this.cluster = new eks.cloudformation.ClusterResource(this, props.clusterName, {
-      clusterName: props.clusterName,
+      name: props.clusterName,
       resourcesVpcConfig: {
         subnetIds: publicSubnetIds.concat(privateSubnetIds),
         securityGroupIds: [controlPlaneSG.securityGroupId],

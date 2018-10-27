@@ -11,8 +11,8 @@ const cluster = new EksClusterStack(app, 'EksCluster', { clusterName });
 // worker node configuration properties
 const bastion: boolean = !!app.getContext('bastion');
 const nodeGroupMaxSize = app.getContext('node-group-max-size');
-const nodeGroupMinSize = app.getContext('node-group-max-size');
-const nodeGroupDesiredSize = app.getContext('node-group-max-size');
+const nodeGroupMinSize = app.getContext('node-group-min-size');
+const nodeGroupDesiredSize = app.getContext('node-group-desired-size');
 const keyFromContext = app.getContext('key-name');
 const keyName = (keyFromContext === null) ? undefined : keyFromContext;
 const sshAllowedCidr = app.getContext('ssh-allowed-cidr');
