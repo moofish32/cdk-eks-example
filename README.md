@@ -128,8 +128,8 @@ cdk diff EksWorkers
 # make sure the diff matches what you think is happening
 cdk deploy EksWorkers
 # example success 
- ✅  Deployment of stack EksWorkers completed successfully, it has ARN arn:aws:cloudformation:us-west-2:012345678901:stack/EksWorkers/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
-EksWorkers.WorkerRoleArn = arn:aws:iam::012345678901:role/EksWorkers-WorkersInstanceRoleRRRRRRRR-AAAAAAAAAAA
+Outputs:
+EksWorkers.WorkerRoleArn = arn:aws:iam::667237269012:role/EksWorkers-WorkersInstanceRole510CB30C-QFC0D1PV61B
 # note this ARN for the next step
 ```
 

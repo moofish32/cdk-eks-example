@@ -8,11 +8,6 @@
     "node-group-desired-size": 3,
     "node-group-instance-type": "t3.medium",
     "bastion": false,
-    "ssh-allowed-cidr": [],
-    "availability-zones:account=667237269012:region=us-west-2": [
-      "us-west-2a",
-      "us-west-2b",
-      "us-west-2c"
-    ]
+    "ssh-allowed-cidr": []
   }
 }

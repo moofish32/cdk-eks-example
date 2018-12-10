@@ -8,7 +8,7 @@ const app = new cdk.App();
 const clusterName = app.getContext('cluster-name');
 const cluster = new EksClusterStack(app, 'EksCluster', { clusterName });
 
-// worker node configuration properties
+/* worker node configuration properties */
 const bastion: boolean = !!app.getContext('bastion');
 const nodeGroupMaxSize = app.getContext('node-group-max-size');
 const nodeGroupMinSize = app.getContext('node-group-min-size');

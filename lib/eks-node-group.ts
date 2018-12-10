@@ -37,9 +37,10 @@ export class EksNodeGroupStack extends cdk.Stack {
 
     // have to periodically update this constant
     const amiMap: {[region: string]: string;} = {
-      'us-west-2': 'ami-0a54c984b9f908c81',
-      'us-east-1': 'ami-0440e4f6b9713faf6',
-      'eu-west-1': 'ami-0c7a4976cb6fafd3a',
+      'us-west-2': 'ami-0f54a2f7d2e9c88b3',
+      'us-east-1': 'ami-0a0b913ef3249b655',
+      'us-east-2': 'ami-0958a76db2d150238',
+      'eu-west-1': 'ami-00c3b2d35bddd4f5c',
     };
     this.workerNodeASG = new asg.AutoScalingGroup(this, 'Workers', {
       instanceType: new ec2.InstanceType(props.nodeGroupInstanceType),
